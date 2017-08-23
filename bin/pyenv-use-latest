@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Usage: pyenv use-latest [<version-prefix>] [--local|--global|--shell]
+
+get_version() {
+  [[ -z $query ]] || [[ $query =~ ^-.* ]] && echo "";
+  pyenv versions --bare | grep -E "^\s*$query" | sed s/^\s+// | tail -1
+}
+
+for arg; do
+  case "$arg" in
+    --local|local)
+      command="local"
+      shift
+      ;;
+    --global|global)
+      command="global"
+      shift
+      ;;
+    --shell|shell)
+      command="shell"
+      shift
+      ;;
+    *)
+      query="$arg"
+      versions="$versions $(get_version)"
+      shift
+  esac
+done
+
+[[ -z $command ]] && { echo "No environment specified, please include one of --local, --global, --shell"; exit 1; }
+[[ -z $versions ]] && { echo "Matching version not found"; exit 1; }
+
+echo "Setting $command python to version(s) $versions";
+pyenv $command $versions
